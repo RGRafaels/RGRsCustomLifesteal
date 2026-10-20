@@ -2,82 +2,183 @@ package com.rgrafaels.lifesteal;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.Material;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandExecutor;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.Listener;
-import org.bukkit.event.block.Action;
-import org.bukkit.event.entity.PlayerDeathEvent;
-import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.event.player.PlayerRespawnEvent;
-import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 
-import java.util.HashSet;
-import java.util.Set;
-import java.util.UUID;
-
-public final class PlayerListener implements Listener {
+public final class HeartCommand implements CommandExecutor {
     private final RGRsCustomLifestealWeaponPlugin plugin;
-    private final Set<UUID> deathBanned = new HashSet<>();
 
-    public PlayerListener(RGRsCustomLifestealWeaponPlugin plugin) {
+    public HeartCommand(RGRsCustomLifestealWeaponPlugin plugin) {
         this.plugin = plugin;
     }
 
-    @EventHandler
-    public void onJoin(PlayerJoinEvent event) {
-        Player player = event.getPlayer();
-        plugin.getHeartManager().initializePlayer(player);
+    @Override
+    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+        String commandName = command.getName().toLowerCase();
+
+        switch (commandName) {
+            case "recipe":
+                sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.getConfig().getString("messages.recipe-list", "&6Recipe list.")));
+                return true;
+            case "heartgive":
+                handleGive(sender, args);
+                return true;
+            case "heartremove":
+                handleRemove(sender, args);
+                return true;
+            case "heartwithdraw":
+                handleWithdraw(sender);
+                return true;
+            case "heartrevive":
+                handleRevive(sender, args);
+                return true;
+            case "heart":
+                handleHeart(sender, args);
+                return true;
+            default:
+                return false;
+        }
     }
 
-    @EventHandler
-    public void onDeath(PlayerDeathEvent event) {
-        Player player = event.getEntity();
-        UUID uuid = player.getUniqueId();
-        deathBanned.add(uuid);
-        plugin.getHeartManager().setHearts(uuid, 0);
+    private void handleGive(CommandSender sender, String[] args) {
+        if (!sender.hasPermission("lifesteal.admin")) {
+            sender.sendMessage(configMessage("messages.no-permission", "&cNo permission."));
+            return;
+        }
+        if (args.length != 2) {
+            sender.sendMessage(configMessage("messages.command-usage", "&cUsage: /heartgive <player> <amount>"));
+            return;
+        }
+
+        Player target = Bukkit.getPlayerExact(args[0]);
+        if (target == null) {
+            sender.sendMessage(configMessage("messages.player-not-found", "&cPlayer not found."));
+            return;
+        }
+
+        int amount;
+        try {
+            amount = Integer.parseInt(args[1]);
+        } catch (NumberFormatException ex) {
+            sender.sendMessage(ChatColor.RED + "Amount must be a number.");
+            return;
+        }
+
+        plugin.getHeartManager().addHearts(target, amount);
+        plugin.getHeartManager().syncPlayerHealth(target);
         plugin.getHeartManager().save();
-        player.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.getConfig().getString("messages.death-banned", "&cYou were death-banned...")));
+        sender.sendMessage(configMessage("messages.heart-give", "&aYou gave {player} {amount} hearts.")
+            .replace("{player}", target.getName())
+            .replace("{amount}", String.valueOf(amount)));
     }
 
-    @EventHandler
-    public void onRespawn(PlayerRespawnEvent event) {
-        Player player = event.getPlayer();
-        if (deathBanned.contains(player.getUniqueId())) {
-            player.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.getConfig().getString("messages.death-banned", "&cYou were death-banned...")));
-        }
-    }
-
-    @EventHandler
-    public void onInteract(PlayerInteractEvent event) {
-        if (event.getHand() == null || event.getHand() != EquipmentSlot.HAND) {
+    private void handleRemove(CommandSender sender, String[] args) {
+        if (!sender.hasPermission("lifesteal.admin")) {
+            sender.sendMessage(configMessage("messages.no-permission", "&cNo permission."));
             return;
         }
-        if (!event.getAction().equals(Action.RIGHT_CLICK_BLOCK) && !event.getAction().equals(Action.RIGHT_CLICK_AIR)) {
+        if (args.length != 2) {
+            sender.sendMessage(configMessage("messages.command-usage", "&cUsage: /heartremove <player> <amount>"));
             return;
         }
 
-        Player player = event.getPlayer();
-        ItemStack item = player.getInventory().getItemInMainHand();
-        if (plugin.getCustomItems().isHeartItem(item)) {
-            event.setCancelled(true);
-            if (plugin.getHeartManager().getHearts(player) >= plugin.getMaxHearts()) {
-                player.sendMessage(ChatColor.RED + "Your heart count is already at the maximum.");
+        Player target = Bukkit.getPlayerExact(args[0]);
+        if (target == null) {
+            sender.sendMessage(configMessage("messages.player-not-found", "&cPlayer not found."));
+            return;
+        }
+
+        int amount;
+        try {
+            amount = Integer.parseInt(args[1]);
+        } catch (NumberFormatException ex) {
+            sender.sendMessage(ChatColor.RED + "Amount must be a number.");
+            return;
+        }
+
+        plugin.getHeartManager().removeHearts(target, amount);
+        plugin.getHeartManager().syncPlayerHealth(target);
+        plugin.getHeartManager().save();
+        sender.sendMessage(configMessage("messages.heart-remove", "&aYou removed {amount} hearts from {player}.")
+            .replace("{player}", target.getName())
+            .replace("{amount}", String.valueOf(amount)));
+    }
+
+    private void handleWithdraw(CommandSender sender) {
+        if (!(sender instanceof Player player)) {
+            sender.sendMessage(ChatColor.RED + "This command can only be used by players.");
+            return;
+        }
+        if (!sender.hasPermission("lifesteal.use")) {
+            sender.sendMessage(configMessage("messages.no-permission", "&cNo permission."));
+            return;
+        }
+        if (plugin.getHeartManager().getHearts(player) <= 1) {
+            player.sendMessage(configMessage("messages.heart-insufficient", "&cYou do not have enough hearts to withdraw."));
+            return;
+        }
+
+        plugin.getHeartManager().removeHearts(player, 1);
+        plugin.getHeartManager().syncPlayerHealth(player);
+        ItemStack heart = plugin.getCustomItems().createHeartItem();
+        player.getInventory().addItem(heart);
+        player.sendMessage(configMessage("messages.heart-withdraw", "&aYou withdrew a heart item."));
+        plugin.getHeartManager().save();
+    }
+
+    private void handleRevive(CommandSender sender, String[] args) {
+        if (!sender.hasPermission("lifesteal.revive")) {
+            sender.sendMessage(configMessage("messages.no-permission", "&cNo permission."));
+            return;
+        }
+        if (args.length != 1) {
+            sender.sendMessage(configMessage("messages.command-usage", "&cUsage: /heartrevive <player>"));
+            return;
+        }
+
+        Player target = Bukkit.getPlayerExact(args[0]);
+        if (target == null) {
+            sender.sendMessage(configMessage("messages.player-not-found", "&cPlayer not found."));
+            return;
+        }
+        if (!plugin.isDeathBanned(target)) {
+            sender.sendMessage(configMessage("messages.revive-failed", "&cThat player is not death-banned."));
+            return;
+        }
+
+        plugin.revivePlayer(target, sender instanceof Player p ? p : null);
+    }
+
+    private void handleHeart(CommandSender sender, String[] args) {
+        if (args.length == 0) {
+            sender.sendMessage(ChatColor.GOLD + "RGRs Custom Lifesteal Weapon");
+            sender.sendMessage(ChatColor.GRAY + "/heart reload" );
+            sender.sendMessage(ChatColor.GRAY + "/heartgive <player> <amount>");
+            sender.sendMessage(ChatColor.GRAY + "/heartremove <player> <amount>");
+            sender.sendMessage(ChatColor.GRAY + "/heartwithdraw");
+            sender.sendMessage(ChatColor.GRAY + "/heartrevive <player>");
+            sender.sendMessage(ChatColor.GRAY + "/recipe");
+            return;
+        }
+
+        if (args[0].equalsIgnoreCase("reload")) {
+            if (!sender.hasPermission("lifesteal.admin")) {
+                sender.sendMessage(configMessage("messages.no-permission", "&cNo permission."));
                 return;
             }
-            plugin.getHeartManager().addHearts(player, 1);
-            plugin.getHeartManager().syncPlayerHealth(player);
-            item.setAmount(item.getAmount() - 1);
-            player.sendMessage(ChatColor.GREEN + "You used a heart and gained 1 heart of life.");
+            plugin.reloadPluginConfig();
+            sender.sendMessage(configMessage("messages.reload-success", "&aConfiguration reloaded."));
             return;
         }
 
-        if (plugin.getCustomItems().isReviveItem(item)) {
-            event.setCancelled(true);
-            Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "say " + player.getName() + " has triggered the revive beacon item.");
-            player.sendMessage(ChatColor.YELLOW + "Use /heartrevive <player> or right click a revive beacon block to revive a death-banned player.");
-        }
+        sender.sendMessage(ChatColor.GOLD + "RGRs Custom Lifesteal Weapon");
+        sender.sendMessage(ChatColor.GRAY + "Use /heart reload or /recipe for details.");
+    }
+
+    private String configMessage(String key, String fallback) {
+        return ChatColor.translateAlternateColorCodes('&', plugin.getConfig().getString(key, fallback));
     }
 }

@@ -16,7 +16,7 @@ messages:
   heart-remove: '&aYou removed {amount} hearts from {player}.'
   heart-withdraw: '&aYou withdrew a heart item.'
   heart-insufficient: '&cYou do not have enough hearts to withdraw.'
-  recipe-list: '&6Custom recipes:&r\n&cHeart:&r &7Netherite Block center, Gold on corners, Diamond on all side slots.\n&dRevive Block:&r &7Netherite Star center, Diamond on corners, Netherite Ingots on side slots.'
+  recipe-list: '&6Custom recipes:&r\n&cHeart:&r &7Netherite block center, gold block corners, diamond side slots.\n&dRevive Block:&r &7Netherite star center, diamond corners, netherite ingots in the remaining slots.'
   revive-success: '&a{player} has been revived and returned with 5 hearts.'
   revive-failed: '&cThat player is not death-banned.'
   reload-success: '&aConfiguration reloaded.'

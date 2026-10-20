@@ -1,52 +1,36 @@
 # RGRs Custom Lifesteal Weapon
 
-This plugin is designed for Purpur 1.21.11 and includes:
+A Purpur 1.21.11 plugin project for custom hearts, commands, recipes, and revival.
 
-- Admin heart management commands (`/heartgive`, `/heartremove`)
-- Player withdraw command (`/heartwithdraw`)
-- Custom heart item recipe
-- Custom revive block recipe
-- `/heart reload` config support
-- `/heartrevive <player>` command for reviving death-banned players
-- Maximum heart cap of 20
-- Revival starts players at 5 hearts
+## Requirements
 
-## Commands
+- Purpur 1.21.11
+- Java 21
 
-- `/heartgive <player> <amount>` - Give hearts to another player
-- `/heartremove <player> <amount>` - Remove hearts from a player
-- `/heartwithdraw` - Withdraw one of your own hearts into an item
-- `/recipe` - Show craft recipes
-- `/heartrevive <player>` - Revive a death-banned player
-- `/heart reload` - Reload the config
-
-## Recipes
-
-### Heart recipe
-
-- Center: Netherite block
-- Corners: Gold blocks
-- Remaining side slots: Diamonds
-
-### Revive block recipe
-
-- Center: Netherite star
-- Corners: Diamond blocks
-- Remaining side slots: Netherite ingots
+Important: do not use Java 25 with Purpur 1.21.11. The server runtime is Java 21 compatible.
 
 ## Build
 
 ```bash
-gradlew build
+./gradlew clean build
 ```
 
-Place the generated jar in your Purpur plugins folder and restart the server.
+## Commands
 
-## Notes
+- `/heart` - main plugin info and reload
+- `/heartgive <player> <amount>`
+- `/heartremove <player> <amount>`
+- `/heartwithdraw`
+- `/heartrevive <player>`
+- `/recipe`
 
-This is a source-ready plugin project and is intended for a Purpur 1.21.11 server.
-A full resource pack for custom textures can be added later if you want an even more advanced visual style.
+## Features
 
-## Credits
+- max hearts: 20
+- start hearts: 10
+- revive start hearts: 5
+- custom heart item recipe
+- custom revive block recipe
+- death-banned player management
 
-Created by RGRafaels.
+Place the generated jar in your Purpur `plugins` folder and restart the server.

@@ -4,7 +4,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
-import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -14,7 +13,6 @@ import org.bukkit.persistence.PersistentDataType;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.UUID;
 
 public final class CustomItems {
     private final RGRsCustomLifestealWeaponPlugin plugin;
@@ -35,12 +33,11 @@ public final class CustomItems {
         }
 
         meta.setDisplayName(ChatColor.translateAlternateColorCodes('&', Objects.requireNonNullElse(plugin.getConfig().getString("heart-withdraw-item-name"), "&cHardcore Heart")));
-        List<String> lore = plugin.getConfig().getStringList("heart-item-lore");
-        List<String> translated = new ArrayList<>();
-        for (String line : lore) {
-            translated.add(ChatColor.translateAlternateColorCodes('&', line));
+        List<String> translatedLore = new ArrayList<>();
+        for (String line : plugin.getConfig().getStringList("heart-item-lore")) {
+            translatedLore.add(ChatColor.translateAlternateColorCodes('&', line));
         }
-        meta.setLore(translated);
+        meta.setLore(translatedLore);
         meta.getPersistentDataContainer().set(heartKey, PersistentDataType.BYTE, (byte) 1);
         meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
         item.setItemMeta(meta);
@@ -55,12 +52,11 @@ public final class CustomItems {
         }
 
         meta.setDisplayName(ChatColor.translateAlternateColorCodes('&', Objects.requireNonNullElse(plugin.getConfig().getString("revive-block-name"), "&dRevive Beacon")));
-        List<String> lore = plugin.getConfig().getStringList("revive-block-lore");
-        List<String> translated = new ArrayList<>();
-        for (String line : lore) {
-            translated.add(ChatColor.translateAlternateColorCodes('&', line));
+        List<String> translatedLore = new ArrayList<>();
+        for (String line : plugin.getConfig().getStringList("revive-block-lore")) {
+            translatedLore.add(ChatColor.translateAlternateColorCodes('&', line));
         }
-        meta.setLore(translated);
+        meta.setLore(translatedLore);
         meta.getPersistentDataContainer().set(reviveKey, PersistentDataType.BYTE, (byte) 1);
         item.setItemMeta(meta);
         return item;
@@ -90,7 +86,11 @@ public final class CustomItems {
         return pdc.has(reviveKey, PersistentDataType.BYTE);
     }
 
-    public static String formatPlayerName(Player player) {
-        return player == null ? "Unknown" : Bukkit.getOfflinePlayer(player.getUniqueId()).getName() == null ? player.getName() : Bukkit.getOfflinePlayer(player.getUniqueId()).getName();
+    public static String formatPlayerName(org.bukkit.entity.Player player) {
+        if (player == null) {
+            return "Unknown";
+        }
+        String name = Bukkit.getOfflinePlayer(player.getUniqueId()).getName();
+        return name != null ? name : player.getName();
     }
 }
