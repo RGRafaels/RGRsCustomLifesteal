@@ -1,0 +1,23 @@
+max-hearts: 20
+start-hearts: 10
+revive-start-hearts: 5
+heart-withdraw-item-name: '&cHardcore Heart'
+heart-item-lore:
+  - '&7A heart harvested from your own soul.'
+  - '&7Use it to recover life or trade it.'
+revive-block-name: '&dRevive Beacon'
+revive-block-lore:
+  - '&7Place and right-click to revive a death-banned player.'
+messages:
+  no-permission: '&cYou do not have permission to do that.'
+  player-not-found: '&cPlayer not found.'
+  command-usage: '&cUsage: {usage}'
+  heart-give: '&aYou gave {player} {amount} hearts.'
+  heart-remove: '&aYou removed {amount} hearts from {player}.'
+  heart-withdraw: '&aYou withdrew a heart item.'
+  heart-insufficient: '&cYou do not have enough hearts to withdraw.'
+  recipe-list: '&6Custom recipes:&r\n&cHeart:&r &7Netherite Block center, Gold on corners, Diamond on all side slots.\n&dRevive Block:&r &7Netherite Star center, Diamond on corners, Netherite Ingots on side slots.'
+  revive-success: '&a{player} has been revived and returned with 5 hearts.'
+  revive-failed: '&cThat player is not death-banned.'
+  reload-success: '&aConfiguration reloaded.'
+  death-banned: '&cYou were death-banned after dying. A revive beacon or admin may bring you back.'

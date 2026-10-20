@@ -1,0 +1,36 @@
+name: RGRsCustomLifestealWeapon
+version: 1.0.0
+main: com.rgrafaels.lifesteal.RGRsCustomLifestealWeaponPlugin
+api-version: '1.21'
+author: RGRafaels
+description: Advanced custom lifesteal plugin with hearts, recipes, commands, and revive systems.
+commands:
+  heart:
+    description: Main lifesteal command.
+    usage: /heart <reload|help>
+    aliases: [lifesteal]
+  heartgive:
+    description: Give a player extra hearts.
+    usage: /heartgive <player> <amount>
+  heartremove:
+    description: Remove hearts from a player.
+    usage: /heartremove <player> <amount>
+  heartwithdraw:
+    description: Withdraw one of your own hearts into an item.
+    usage: /heartwithdraw
+  heartrevive:
+    description: Revive a death-banned player.
+    usage: /heartrevive <player>
+  recipe:
+    description: Show custom lifesteal recipes.
+    usage: /recipe
+permissions:
+  lifesteal.admin:
+    description: Allows admin management commands.
+    default: op
+  lifesteal.revive:
+    description: Allows using the revive commands.
+    default: op
+  lifesteal.use:
+    description: Allows use of the withdraw and recipe commands.
+    default: true

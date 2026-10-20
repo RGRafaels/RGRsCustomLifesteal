@@ -1,0 +1,31 @@
+plugins {
+    id 'java'
+}
+
+group = 'com.rgrafaels'
+version = '1.0.0'
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
+}
+
+repositories {
+    mavenCentral()
+    maven { url = 'https://repo.papermc.io/repository/maven-public/' }
+    maven { url = 'https://repo.purpurmc.org/snapshots' }
+}
+
+dependencies {
+    compileOnly 'org.purpurmc.purpur:purpur-api:1.21.11-R0.1-SNAPSHOT'
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+}
+
+jar {
+    archiveBaseName.set('RGRsCustomLifestealWeapon')
+    archiveVersion.set(project.version.toString())
+}
